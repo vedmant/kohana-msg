@@ -1,58 +1,25 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * Message is a class that lets you easily send messages
+ * Msg is a class that lets you easily send messages
  * in your application (aka Flash Messages)
  *
  * @package    Message
- * @author     Dave Widmer
- * @see        http://github.com/daveWid/message
- * @see        http://www.davewidmer.net
- * @copyright  2010-2011 © Dave Widmer
+ * @author     Vemdant <vedmant@gmail.com>
  */
-class Message_Core
+class Kohana_Msg
 {
 	/**
 	 * @var  string    The default view if one isn't passed into display/render.
 	 */
-	public static $default = "message/basic";
+	public static $default = "messages/bootstrap";
 
 	/**
 	 * Constants to use for the types of messages that can be set.
 	 */
-	const ERROR = 'error';
-	const NOTICE = 'notice';
+	const ERROR = 'danger';
+	const NOTICE = 'info';
 	const SUCCESS = 'success';
-	const WARN = 'warn';
-
-	/**
-	 * @var  mixed    The message to display.
-	 */
-	public $message;
-
-	/**
-	 * @var  string   The type of message.
-	 */
-	public $type;
-
-	/**
-	 * Creates a new Message instance.
-	 *
-	 * @param   string   Type of message
-	 * @param   mixed    Message to display, either string or array
-	 */
-	public function __construct($type, $message)
-	{
-		$this->type = $type;
-		$this->message = $message;
-	}
-
-	/**
-	 * Clears the message from the session.
-	 */
-	public static function clear()
-	{
-		Session::instance()->delete('flash_message');
-	}
+	const WARNING = 'warning';
 
 	/**
 	 * Displays the message.
@@ -62,21 +29,15 @@ class Message_Core
 	 */
 	public static function display($view = null)
 	{
-		$html = "";
-		$msg = self::get();
-
-		if($msg)
+		if($messages = self::get())
 		{
-			if ($view === null)
-			{
+			if($view === null)
 				$view = self::$default;
-			}
 
 			self::clear();
-			$html = View::factory($view)->set('message', $msg)->render();
-		}
 
-		return $html;
+			return View::factory($view)->set('messages', $messages)->render();
+		}
 	}
 
 	/**
@@ -97,7 +58,7 @@ class Message_Core
 	 */
 	public static function get()
 	{
-		return Session::instance()->get('flash_message', FALSE);
+		return Session::instance()->get('messages', array());
 	}
 
 	/**
@@ -108,7 +69,27 @@ class Message_Core
 	 */
 	public static function set($type, $message)
 	{
-		Session::instance()->set('flash_message', new Message($type, $message));
+		if($message === '') return;
+
+		$session_msgs = self::get();
+
+		if( ! isset($session_msgs[$type])) $session_msgs[$type] = array();
+
+		if(is_array($message)){
+			$session_msgs[$type] = array_merge($session_msgs[$type], $message);
+		}else{
+			$session_msgs[$type][] = $message;
+		}
+
+		Session::instance()->set('messages', $session_msgs);
+	}
+
+	/**
+	 * Clears the messages from the session.
+	 */
+	public static function clear()
+	{
+		Session::instance()->delete('messages');
 	}
 
 	/**
@@ -118,7 +99,7 @@ class Message_Core
 	 */
 	public static function error($message)
 	{
-		self::set(Message::ERROR, $message);
+		self::set(self::ERROR, $message);
 	}
 
 	/**
@@ -126,9 +107,9 @@ class Message_Core
 	 *
 	 * @param    mixed    String/Array for the message(s)
 	 */
-	public static function notice($message)
+	public static function info($message)
 	{
-		self::set(Message::NOTICE, $message);
+		self::set(self::NOTICE, $message);
 	}
 
 	/**
@@ -138,7 +119,7 @@ class Message_Core
 	 */
 	public static function success($message)
 	{
-		self::set(Message::SUCCESS, $message);
+		self::set(self::SUCCESS, $message);
 	}
 
 	/**
@@ -146,9 +127,9 @@ class Message_Core
 	 *
 	 * @param    mixed    String/Array for the message(s)
 	 */
-	public static function warn($message)
+	public static function warning($message)
 	{
-		self::set(Message::WARN, $message);
+		self::set(self::WARNING, $message);
 	}
 
 }

@@ -4,11 +4,11 @@ return array
 (
 	'modules' => array
 	(
-		'message' => array
+		'msg' => array
 		(
 			'enabled' => TRUE,
-			'name' => "Message",
-			'description' => "A flash messaging system for Kohana v3.0 and higher.",
+			'name' => "Msg",
+			'description' => "A flash messaging system for Kohana v3.3 and higher.",
 			'copyright' => '&copy; 2010–2011 Dave Widmer',
 		)  
 	)
